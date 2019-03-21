@@ -531,3 +531,44 @@ def visual_around_poly(binary_warped, left_fit, right_fit, out_img, margin=100):
     right_xy = (right_fitx[right_xbounds], ploty_right[right_xbounds])
 
     return result, left_xy, right_xy
+
+def measure_curvature_pixels(ploty, left_fit, right_fit):
+    '''
+    Calculates the curvature of polynomial functions in pixels.
+    '''
+
+    # Define y-value where we want radius of curvature
+    # We'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = np.max(ploty)
+
+    ##### TO-DO: Implement the calculation of R_curve (radius of curvature) #####
+    # (1 + (2*A*y + B)^2)^(3/2)/abs(2*A)
+    A_left = left_fit[0]
+    B_left = left_fit[1]
+    left_curverad = (1 + (2*A_left*y_eval + B_left)**2)**(3.0/2)/np.abs(2*A_left)
+    A_right = right_fit[0]
+    B_right = right_fit[1]
+    right_curverad = (1 + (2*A_right*y_eval + B_right)**2)**(3.0/2)/np.abs(2*A_right)
+
+    return left_curverad, right_curverad
+
+def measure_curvature_real(ploty, left_fit_cr, right_fit_cr, ym_per_pix=(30/720), xm_per_pix=(3.7/700)):
+    '''
+    Calculates the curvature of polynomial functions in meters.
+    '''
+
+    # Define y-value where we want radius of curvature
+    # We'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = np.max(ploty)
+
+    ##### TO-DO: Implement the calculation of R_curve (radius of curvature) #####
+    # (1 + (2*A*y + B)^2)^(3/2)/abs(2*A)
+    y_m = y_eval*ym_per_pix
+    A_left = left_fit_cr[0]
+    B_left = left_fit_cr[1]
+    left_curverad = (1 + (2*A_left*y_m + B_left)**2)**(3.0/2)/np.abs(2*A_left)
+    A_right = right_fit_cr[0]
+    B_right = right_fit_cr[1]
+    right_curverad = (1 + (2*A_right*y_m + B_right)**2)**(3.0/2)/np.abs(2*A_right)
+
+    return left_curverad, right_curverad
