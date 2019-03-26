@@ -572,3 +572,70 @@ def measure_curvature_real(ploty, left_fit_cr, right_fit_cr, ym_per_pix=(30/720)
     right_curverad = (1 + (2*A_right*y_m + B_right)**2)**(3.0/2)/np.abs(2*A_right)
 
     return left_curverad, right_curverad
+
+# Define a class to receive the characteristics of each line detection
+class Line():
+    def __init__(self):
+        # was the line detected in the last iteration?
+        self.detected = False
+        # x values of the last n fits of the line
+        self.recent_xfitted = []
+        #average x values of the fitted line over the last n iterations
+        self.bestx = None
+        #polynomial coefficients averaged over the last n iterations
+        self.best_fit = None
+        #polynomial coefficients for the most recent fit
+        self.current_fit = [np.array([False])]
+        #radius of curvature of the line in some units
+        self.radius_of_curvature = None
+        #distance in meters of vehicle center from the line
+        self.line_base_pos = None
+        #difference in fit coefficients between last and new fits
+        self.diffs = np.array([0,0,0], dtype='float')
+        #x values for detected line pixels
+        self.allx = None
+        #y values for detected line pixels
+        self.ally = None
+
+def sanity_check(ploty, left_fit, right_fit, leftx, lefty, rightx, righty,
+                 thresh_lane=(600, 800), thresh_lane_diff=200, thresh_curve=10):
+
+    # Find lane width
+    # Lane width at bottom of image
+    y_eval = np.max(ploty)
+    left_fitx_eval = left_fit[0]*y_eval**2 + left_fit[1]*y_eval + left_fit[2]
+    right_fitx_eval = right_fit[0]*y_eval**2 + right_fit[1]*y_eval + right_fit[2]
+    lane_width = np.abs(left_fitx_eval - right_fitx_eval)
+    # Lane width at top of image
+    y_min = np.min(ploty)
+    left_fitx_min = left_fit[0]*y_min**2 + left_fit[1]*y_min + left_fit[2]
+    right_fitx_min = right_fit[0]*y_min**2 + right_fit[1]*y_min + right_fit[2]
+    lane_width_min = np.abs(left_fitx_min - right_fitx_min)
+
+    lane_width_diff = np.abs(lane_width - lane_width_min)
+
+    # Determine the curvature of the lane
+    ym_per_pix=(30/720)
+    xm_per_pix=(3.7/700)
+    left_fit_m = np.polyfit(ym_per_pix*lefty, xm_per_pix*leftx, 2)
+    right_fit_m = np.polyfit(ym_per_pix*righty, xm_per_pix*rightx, 2)
+    left_curverad_m, right_curverad_m = measure_curvature_real(ploty, left_fit_m, right_fit_m)
+
+    curve_ratio = left_curverad_m/right_curverad_m
+
+    is_detected_lane = False
+    if ((lane_width > thresh_lane[0]) and (lane_width < thresh_lane[1])):
+        is_detected_lane = True
+
+    # Sanity check
+    is_detected_diff = False
+    if (lane_width_diff < thresh_lane_diff):
+        is_detected_diff = True
+
+    is_detected_curve = False
+    if ((curve_ratio < thresh_curve) and (curve_ratio > (1.0/thresh_curve))):
+        is_detected_curve = True
+
+    is_detected = is_detected_lane and is_detected_diff and is_detected_curve
+
+    return is_detected, lane_width, lane_width_min
