@@ -25,6 +25,7 @@ The goals / steps of this project are the following:
 [image6]: ./output_images/test5_detect_lane_slide.jpg "Sliding Window"
 [image7]: ./output_images/test5_detect_lane_prev.jpg "Search Around Polynomial"
 [image8]: ./output_images/test5_curve_pos.jpg "Result"
+[video1]: ./output_videos/project_video_out.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
